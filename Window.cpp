@@ -30,6 +30,7 @@ MatrixTransform *robot, *head, *torso, *left_arm, *right_arm, *left_leg, *right_
 MatrixTransform *platoon1, *platoon2;
 int army_size = 10;
 //int army_size = 40;
+//int army_size = 20;
 std::vector<std::vector<MatrixTransform*>> robot_army_1(army_size, std::vector<MatrixTransform*> (army_size));
 std::vector<std::vector<MatrixTransform*>> robot_army_2(army_size, std::vector<MatrixTransform*> (army_size));
 
@@ -38,6 +39,7 @@ float rotate = -10.0;
 
 int frame1=-1;
 bool animate = false;
+float fps = 0.0;
 void Window::initialize(void)
 {
     //set_light();
@@ -97,12 +99,13 @@ void Window::displayCallback()
     frame++;
     t=glutGet(GLUT_ELAPSED_TIME);
     if (t - timebase > 1000) {
-        printf("FPS:%4.2f\n",
-               frame*1000.0/(t-timebase));
+        //printf("FPS:%4.2f\n",
+//               frame*1000.0/(t-timebase));
+        fps = frame*1000.0/(t-timebase);
         timebase = t;
         frame = 0;
         //std::cout << "Robots: "<<Globals::number_heads << std::endl;
-        printf("#Robots:%d\n",Globals::number_heads);
+        //printf("#Robots:%d\n",Globals::number_heads);
     }
 
     Globals::number_heads = 0;
@@ -137,6 +140,28 @@ void Window::displayCallback()
     platoon1->draw(m);
     platoon2->draw(m);
     
+    glDisable( GL_DEPTH_TEST ) ; // also disable the depth test so renders on top
+    glDisable(GL_LIGHTING);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0,1.0,1.0);
+    glRasterPos2i(-10,10);
+    //glColor3f(1.0,0.0,0.0);
+    char buf[300];
+    //std::string num =  "# of Robots:" + std::to_string(Globals::number_heads);
+    sprintf( buf, "Robots: %d", Globals::number_heads) ;
+    const char * p = buf ;
+    do glutBitmapCharacter( GLUT_BITMAP_HELVETICA_18, *p ); while( *(++p) ) ;
+
+    glRasterPos2i(-10,8);
+    char buf1[300];
+    sprintf( buf1, "FPS: %4.2f\n", fps) ;
+    p = buf1 ;
+    do glutBitmapCharacter( GLUT_BITMAP_HELVETICA_18, *p ); while( *(++p) ) ;
+
+    glEnable( GL_DEPTH_TEST ) ; // Turn depth testing back on
+    glEnable(GL_LIGHTING);
+
+   
     //Bind the light to slot 0.  We do this after the camera matrix is loaded so that
     //the light position will be treated as world coordiantes
     //(if we didn't the light would move with the camera, why is that?)
